@@ -12,6 +12,9 @@ use crate::http::HttpResponse;
 use js_sys::Promise;
 use wasm_bindgen_futures::future_to_promise;
 
+mod cfkv;
+use crate::cfkv::*;
+
 cfg_if! {
     // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
     // allocator.
@@ -23,11 +26,28 @@ cfg_if! {
 }
 
 #[wasm_bindgen]
-pub async fn wasm_main(context: JsValue) -> Promise {
+pub async fn wasm_main(context: JsValue, kv: WorkersKvJs) -> Promise {
     future_to_promise(async move {
         let value = JsValue::from_serde(
             &(match context.into_serde::<Context>() {
-                Ok(ctx) => ctx.handle_http_request().await,
+                Ok(ctx) => {
+                    let kv = WorkersKv { kv };
+
+                    // mock
+                    kv.put_text("Crypto.SOL/USD", "test1", 60 * 60 * 24 * 365)
+                        .await
+                        .unwrap_or_default();
+
+                    // get
+                    let product_hashmap = kv
+                        .get_text("Crypto.SOL/USD")
+                        .await
+                        .unwrap_or_default()
+                        .unwrap_or_default();
+
+                    ctx.handle_http_request().await
+                }
+
                 Err(error) => HttpResponse {
                     status: 400,
                     body: error.to_string(),

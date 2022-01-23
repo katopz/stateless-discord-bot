@@ -29,7 +29,7 @@ async function handleRequest(request) {
       }
     }
 
-    const { status, body } = await wasm_main(context)
+    const { status, body } = await wasm_main(context, DEVNET_PYTH_PRODUCTS)
 
     return new Response(body, {
       status,
