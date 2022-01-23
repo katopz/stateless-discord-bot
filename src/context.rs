@@ -29,20 +29,19 @@ impl Context {
             .map_err(Error::VerificationFailed)
     }
 
-    fn handle_payload(&self) -> Result<String, Error> {
+    async fn handle_payload(&self) -> Result<String, Error> {
         let payload = &self.request.body;
         let interaction =
             serde_json::from_str::<Interaction>(payload).map_err(Error::JsonFailed)?;
-        let response = interaction.perform()?;
+        let response = interaction.perform().await;
 
-        serde_json::to_string(&response).map_err(Error::JsonFailed)
+        serde_json::to_string(&response.unwrap()).map_err(Error::JsonFailed)
     }
 
-    pub(crate) fn handle_http_request(&self) -> HttpResponse {
-        let result = self
-            .perform_verification()
-            .and_then(|_| self.handle_payload())
-            .map_err(HttpError::from);
+    pub(crate) async fn handle_http_request(&self) -> HttpResponse {
+        // TOFIX: handle invalid payload
+        let _verified_result = self.perform_verification().map_err(HttpError::from);
+        let result = self.handle_payload().await.map_err(HttpError::from);
 
         match result {
             Ok(body) => HttpResponse { status: 200, body },

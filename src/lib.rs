@@ -27,7 +27,7 @@ pub async fn wasm_main(context: JsValue) -> Promise {
     future_to_promise(async move {
         let value = JsValue::from_serde(
             &(match context.into_serde::<Context>() {
-                Ok(ctx) => ctx.handle_http_request(),
+                Ok(ctx) => ctx.handle_http_request().await,
                 Err(error) => HttpResponse {
                     status: 400,
                     body: error.to_string(),

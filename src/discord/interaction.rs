@@ -56,13 +56,13 @@ pub(crate) struct InteractionResponse {
 }
 
 impl Interaction {
-    pub(crate) fn perform(&self) -> Result<InteractionResponse, Error> {
+    pub(crate) async fn perform(&self) -> Result<InteractionResponse, Error> {
         Ok(match self.ty {
             InteractionType::Ping => InteractionResponse {
                 ty: InteractionResponseType::Pong,
                 data: None,
             },
-            InteractionType::ApplicationCommand => handle_command(self.data()?),
+            InteractionType::ApplicationCommand => handle_command(self.data()?).await,
         })
     }
 }
