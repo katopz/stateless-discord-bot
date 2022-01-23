@@ -34,18 +34,15 @@ pub async fn wasm_main(context: JsValue, kv: WorkersKvJs) -> Promise {
                     let kv = WorkersKv { kv };
 
                     // mock
-                    kv.put_text("Crypto.SOL/USD", "test1", 60 * 60 * 24 * 365)
-                        .await
-                        .unwrap_or_default();
+                    kv.put_text(
+                        "Crypto.SOL/USD",
+                        "J83w4HKfqxwcq3BEMMkPFSppX3gqekLyLJBexebFVkix",
+                        60 * 60 * 24 * 365,
+                    )
+                    .await
+                    .unwrap_or_default();
 
-                    // get
-                    let product_hashmap = kv
-                        .get_text("Crypto.SOL/USD")
-                        .await
-                        .unwrap_or_default()
-                        .unwrap_or_default();
-
-                    ctx.handle_http_request().await
+                    ctx.handle_http_request(&kv).await
                 }
 
                 Err(error) => HttpResponse {

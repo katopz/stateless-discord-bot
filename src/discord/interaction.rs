@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
+use crate::cfkv::WorkersKv;
 use crate::discord::command::handle_command;
 use crate::error::Error;
 
@@ -56,13 +57,13 @@ pub(crate) struct InteractionResponse {
 }
 
 impl Interaction {
-    pub(crate) async fn perform(&self) -> Result<InteractionResponse, Error> {
+    pub(crate) async fn perform(&self, kv: &WorkersKv) -> Result<InteractionResponse, Error> {
         Ok(match self.ty {
             InteractionType::Ping => InteractionResponse {
                 ty: InteractionResponseType::Pong,
                 data: None,
             },
-            InteractionType::ApplicationCommand => handle_command(self.data()?).await,
+            InteractionType::ApplicationCommand => handle_command(self.data()?, kv).await,
         })
     }
 }
